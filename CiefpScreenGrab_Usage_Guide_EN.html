@@ -1,0 +1,213 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CiefpScreenGrab - User Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #1f771f;
+        }
+        h1 {
+            border-bottom: 2px solid #1f771f;
+            padding-bottom: 10px;
+        }
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .note {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-left: 4px solid #a08500;
+            margin: 10px 0;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        strong {
+            color: #18188b;
+        }
+    </style>
+</head>
+<body>
+    <h1>CiefpScreenGrab Plugin - User Guide</h1>
+    <p><strong>Version: 1.2</strong><br>
+    CiefpScreenGrab is an Enigma2 plugin for capturing screenshots on your satellite receiver. It supports taking screenshots via remote control, a minimalist interface, viewing and deleting saved images, and customizing format and resolution.</p>
+
+    <div class="section">
+        <h2>Configuration</h2>
+        <ol>
+            <li>Open the plugin from the menu: <strong>Menu → Plugins → CiefpScreenGrab</strong>.</li>
+            <li>Settings:
+                <ul>
+                    <li><strong>Enable CiefpScreenGrab</strong>: Enable the plugin (default: True).</li>
+                    <li><strong>Use Minimal Skin</strong>: Enable the minimalist interface (small window in the top-right corner, default: True).</li>
+                    <li><strong>Screenshot of</strong>: Choose what to capture:
+                        <ul>
+                            <li>OSD + Video (default)</li>
+                            <li>Video only</li>
+                            <li>OSD only</li>
+                        </ul>
+                    </li>
+                    <li><strong>Format for screenshots</strong>: JPG or PNG (default: PNG).
+                        <ul>
+                            <li>If JPG, adjust <strong>Quality of jpg picture</strong> (10-100, default: 100).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Picture size (width)</strong>: Image resolution (default: Skin resolution, options: 720, 1280, 1920).</li>
+                    <li><strong>Path for screenshots</strong>: Where images are saved (default: <code>/media/hdd/CiefpScreenGrab</code>, options: <code>/media/hdd</code>, <code>/media/usb</code>, <code>/tmp</code>).</li>
+                    <li><strong>Select a button to take a screenshot</strong>: Remote button for capturing (default: None).
+                        <ul>
+                            <li>Options: Mute, Help, Info, Timer, EPG, TV, Radio, Text, Audio, Red, Green, Yellow, Blue.</li>
+                            <li>For Red, Green, Yellow: Only long press works.</li>
+                            <li>For others: Choose short or long press (adjust <strong>Use the '[button]' button instead of '[button] long'</strong>).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Timeout for info message</strong>: Notification duration (default: 3 seconds, options: 1, 3, 5, 10, off, no timeout).</li>
+                </ul>
+            </li>
+            <li>Save: <strong>Green button</strong>.</li>
+            <li>Reset to defaults: <strong>Yellow button</strong> (requires confirmation).</li>
+        </ol>
+        <div class="note">
+            <strong>Note</strong>: Ensure the selected storage device (e.g., <code>/media/hdd</code>) is available and writable. If not, change the path.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Usage</h2>
+        <h3>Capturing a Screenshot</h3>
+        <ol>
+            <li><strong>Via Button</strong>:
+                <ul>
+                    <li>Set a button in the settings (e.g., Blue).</li>
+                    <li>Press the chosen button (short or long press, depending on settings).</li>
+                    <li>The screenshot is captured and displayed immediately.</li>
+                </ul>
+            </li>
+            <li><strong>Via Minimal Skin</strong>:
+                <ul>
+                    <li>Open the plugin (if <strong>Use Minimal Skin</strong> is enabled).</li>
+                    <li>Press the green button (Grab).</li>
+                    <li>The screenshot is captured and displayed.</li>
+                </ul>
+            </li>
+            <li><strong>Preview After Capture</strong>:
+                <ul>
+                    <li>After capturing, a preview screen opens with the image (1250x750).</li>
+                    <li>Options:
+                        <ul>
+                            <li><strong>Red button (Exit)</strong>: Closes the preview.</li>
+                            <li><strong>Yellow button (Files)</strong>: Opens the list of saved images.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Viewing and Deleting Images</h3>
+        <ol>
+            <li>Open the image list:
+                <ul>
+                    <li>From Minimal Skin: <strong>Yellow button (Files)</strong>.</li>
+                    <li>From settings: <strong>Blue button (Files)</strong>.</li>
+                    <li>From screenshot preview: <strong>Yellow button (Files)</strong>.</li>
+                </ul>
+            </li>
+            <li>In <strong>FileScreen</strong>:
+                <ul>
+                    <li>Left: List of files (newest at the top).</li>
+                    <li>Right: Preview of the selected image (1300x700).</li>
+                    <li><strong>OK button</strong>: Selects/deselects a file (marked with <code>[X]</code>).</li>
+                    <li><strong>Green button (Select All)</strong>: Selects all files.</li>
+                    <li><strong>Red button (Delete)</strong>: Deletes selected files (requires confirmation).</li>
+                    <li><strong>Cancel/Exit</strong>: Closes the screen.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Minimal Skin</h3>
+        <ul>
+            <li>If <strong>Use Minimal Skin</strong> is enabled, the plugin opens as a small window (540x40) in the top-right corner.</li>
+            <li>Functions:
+                <ul>
+                    <li><strong>Red (Exit)</strong>: Closes the window.</li>
+                    <li><strong>Green (Grab)</strong>: Captures a screenshot.</li>
+                    <li><strong>Yellow (Files)</strong>: Opens the image list.</li>
+                    <li><strong>Blue (Settings)</strong>: Opens the settings.</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Recommended Settings</h2>
+        <ul>
+            <li><strong>Format</strong>: PNG for the best quality without loss.</li>
+            <li><strong>Resolution</strong>: Skin resolution or 1280 for a balance of quality and performance.</li>
+            <li><strong>Path</strong>: <code>/media/hdd</code> for permanent storage.</li>
+            <li><strong>Button</strong>: Blue or Red (long press) for easy capturing.</li>
+            <li><strong>Timeout</strong>: 3 seconds for notifications alongside image preview.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Notes</h2>
+        <ul>
+            <li>The plugin has been tested on Vu+ receivers (e.g., Zero 4K) with OpenPLi and OpenATV images.</li>
+            <li>Images are saved in <code>/media/[hdd/usb/tmp]/CiefpScreenGrab/</code>.</li>
+            <li>Avoid using buttons already mapped in the system (e.g., EPG, Info).</li>
+        </ul>
+        <p><strong>Enjoy capturing screenshots with CiefpScreenGrab!</strong></p>
+        <p><strong>..:: CiefpSettings ::..</strong></p>
+    </div>
+</body>
+</html>

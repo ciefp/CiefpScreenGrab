@@ -1,0 +1,213 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CiefpScreenGrab - Uputstvo za korišćenje</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #1f771f;
+        }
+        h1 {
+            border-bottom: 2px solid #1f771f;
+            padding-bottom: 10px;
+        }
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .note {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-left: 4px solid #a08500;
+            margin: 10px 0;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        strong {
+            color: #18188b;
+        }
+    </style>
+</head>
+<body>
+    <h1>CiefpScreenGrab Plugin - Uputstvo za korišćenje</h1>
+    <p><strong>Verzija: 1.2</strong><br>
+    CiefpScreenGrab je Enigma2 plugin za snimanje screenshot-ova sa vašeg satelitskog risivera. Omogućava snimanje ekrana putem daljinskog upravljača, minimalistički interfejs, pregled i brisanje snimljenih slika, kao i prilagođavanje formata i rezolucije.</p>
+
+    <div class="section">
+        <h2>Podešavanje</h2>
+        <ol>
+            <li>Otvorite plugin iz menija: <strong>Menu → Plugins → CiefpScreenGrab</strong>.</li>
+            <li>Podešavanja:
+                <ul>
+                    <li><strong>Enable CiefpScreenGrab</strong>: Uključite plugin (default: True).</li>
+                    <li><strong>Use Minimal Skin</strong>: Uključite minimalistički interfejs (mali prozor u gornjem desnom uglu, default: True).</li>
+                    <li><strong>Screenshot of</strong>: Izaberite šta snimate:
+                        <ul>
+                            <li>OSD + Video (default)</li>
+                            <li>Samo Video</li>
+                            <li>Samo OSD</li>
+                        </ul>
+                    </li>
+                    <li><strong>Format for screenshots</strong>: JPG ili PNG (default: PNG).
+                        <ul>
+                            <li>Ako je JPG, podesite <strong>Quality of jpg picture</strong> (10-100, default: 100).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Picture size (width)</strong>: Rezolucija slike (default: Skin resolution, opcije: 720, 1280, 1920).</li>
+                    <li><strong>Path for screenshots</strong>: Gde se čuvaju slike (default: <code>/media/hdd/CiefpScreenGrab</code>, opcije: <code>/media/hdd</code>, <code>/media/usb</code>, <code>/tmp</code>).</li>
+                    <li><strong>Select a button to take a screenshot</strong>: Dugme na daljinskom za snimanje (default: None).
+                        <ul>
+                            <li>Opcije: Mute, Help, Info, Timer, EPG, TV, Radio, Text, Audio, Red, Green, Yellow, Blue.</li>
+                            <li>Za Red, Green, Yellow: Samo dug pritisak radi.</li>
+                            <li>Za ostale: Možete birati kratki ili dugi pritisak (podesite <strong>Use the '[button]' button instead of '[button] long'</strong>).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Timeout for info message</strong>: Trajanje obaveštenja (default: 3 sekunde, opcije: 1, 3, 5, 10, off, no timeout).</li>
+                </ul>
+            </li>
+            <li>Sačuvajte: <strong>Zeleno dugme</strong>.</li>
+            <li>Reset na podrazumevane vrednosti: <strong>Žuto dugme</strong> (potrebna potvrda).</li>
+        </ol>
+        <div class="note">
+            <strong>Napomena</strong>: Proverite da li je odabrani uređaj za čuvanje slika (npr. <code>/media/hdd</code>) dostupan i upisiv. Ako nije, promenite putanju.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Korišćenje</h2>
+        <h3>Snimanje screenshot-a</h3>
+        <ol>
+            <li><strong>Preko dugmeta</strong>:
+                <ul>
+                    <li>Podesite dugme u podešavanjima (npr. Blue).</li>
+                    <li>Pritisnite odabrano dugme (kratki ili dugi pritisak, zavisno od podešavanja).</li>
+                    <li>Slika se snima i prikazuje odmah u pregledu.</li>
+                </ul>
+            </li>
+            <li><strong>Preko Minimal Skin-a</strong>:
+                <ul>
+                    <li>Otvorite plugin (ako je <strong>Use Minimal Skin</strong> uključen).</li>
+                    <li>Pritisnite zeleno dugme (Grab).</li>
+                    <li>Slika se snima i prikazuje.</li>
+                </ul>
+            </li>
+            <li><strong>Pregled nakon snimanja</strong>:
+                <ul>
+                    <li>Nakon snimanja, otvara se ekran sa slikom (1250x750).</li>
+                    <li>Opcije:
+                        <ul>
+                            <li><strong>Crveno dugme (Exit)</strong>: Zatvara pregled.</li>
+                            <li><strong>Žuto dugme (Files)</strong>: Otvara listu snimljenih slika.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Pregled i brisanje slika</h3>
+        <ol>
+            <li>Otvorite listu slika:
+                <ul>
+                    <li>Iz Minimal Skin-a: <strong>Žuto dugme (Files)</strong>.</li>
+                    <li>Iz podešavanja: <strong>Plavo dugme (Files)</strong>.</li>
+                    <li>Iz pregleda screenshot-a: <strong>Žuto dugme (Files)</strong>.</li>
+                </ul>
+            </li>
+            <li>U <strong>FileScreen</strong>:
+                <ul>
+                    <li>Levo: Lista fajlova (najnoviji na vrhu).</li>
+                    <li>Desno: Pregled odabrane slike (1300x700).</li>
+                    <li><strong>OK dugme</strong>: Selektuje/deselektuje fajl (označeno sa <code>[X]</code>).</li>
+                    <li><strong>Zeleno dugme (Select All)</strong>: Selektuje sve fajlove.</li>
+                    <li><strong>Crveno dugme (Delete)</strong>: Briše selektovane fajlove (potrebna potvrda).</li>
+                    <li><strong>Cancel/Exit</strong>: Zatvara ekran.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Minimal Skin</h3>
+        <ul>
+            <li>Ako je <strong>Use Minimal Skin</strong> uključen, plugin se otvara kao mali prozor (540x40) u gornjem desnom uglu.</li>
+            <li>Funkcije:
+                <ul>
+                    <li><strong>Crveno (Exit)</strong>: Zatvara prozor.</li>
+                    <li><strong>Zeleno (Grab)</strong>: Snima screenshot.</li>
+                    <li><strong>Žuto (Files)</strong>: Otvara listu slika.</li>
+                    <li><strong>Plavo (Settings)</strong>: Otvara podešavanja.</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Preporučena podešavanja</h2>
+        <ul>
+            <li><strong>Format</strong>: PNG za najbolji kvalitet bez gubitaka.</li>
+            <li><strong>Rezolucija</strong>: Skin resolution ili 1280 za balans kvaliteta i performansi.</li>
+            <li><strong>Putanja</strong>: <code>/media/hdd</code> za trajno čuvanje.</li>
+            <li><strong>Dugme</strong>: Blue ili RED(dugi pritisak) za jednostavno snimanje.</li>
+            <li><strong>Timeout</strong>: 3 sekunde za obaveštenje uz pregled slike.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Napomene</h2>
+        <ul>
+            <li>Plugin je testiran na Vu+ risiverima (npr. Zero 4K) sa OpenPLi i OpenATV imidžima.</li>
+            <li>Slike se čuvaju u <code>/media/[hdd/usb/tmp]/CiefpScreenGrab/</code>.</li>
+            <li>Izbegavajte korišćenje dugmadi koja su već mapirana u sistemu (npr. EPG, Info).</li>
+        </ul>
+        <p><strong>Uživajte u snimanju screenshot-ova sa CiefpScreenGrab!</strong></p>
+        <p><strong>..:: CiefpSettings ::..</strong></p>
+    </div>
+</body>
+</html>
