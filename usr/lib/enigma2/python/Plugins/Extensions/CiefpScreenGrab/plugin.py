@@ -17,6 +17,7 @@ from time import time as systime
 from os import path, makedirs, remove
 import glob
 
+# Verzija plugina
 pluginversion = "Version: 1.2"
 config.plugins.CiefpScreenGrab = ConfigSubsection()
 config.plugins.CiefpScreenGrab.enable = ConfigEnableDisable(default=True)
