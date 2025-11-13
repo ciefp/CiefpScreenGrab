@@ -189,19 +189,3 @@ Like it? Star it on GitHub!
 | `.ipk` package | Easy install |
 
 **Want me to generate any of these?** Just say the word!
-
----
-
-**Spreman za GitHub!**  
-Sada ima i **direktan link na tvoje englesko uputstvo** — korisnici će moći da ga otvore odmah, bez preuzimanja.
-
-> **Link u README-u**:  
-> [https://htmlpreview.github.io/?https://raw.githubusercontent.com/ciefp/CiefpScreenGrab/refs/heads/main/CiefpScreenGrab_Usage_Guide_EN.html](https://htmlpreview.github.io/?https://raw.githubusercontent.com/ciefp/CiefpScreenGrab/refs/heads/main/CiefpScreenGrab_Usage_Guide_EN.html)
-
-Ako želiš, mogu ti napraviti i:
-- Prevod uputstva na srpski
-- PDF verziju
-- Automatski generisani `.ipk`
-- `LICENSE` fajl
-
-Samo reci!
