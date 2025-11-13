@@ -36,9 +36,9 @@
 ## Screenshots
 
 
-| ![Main](https://github.com/ciefp/CiefpScreenGrab/blob/main/screenshot1.jpg) |
-| ![Preview](https://github.com/ciefp/CiefpScreenGrab/blob/main/screenshot2.jpg) |
-| ![Files](https://github.com/ciefp/CiefpScreenGrab/blob/main/screenshot2.jpg) |
+| ![Main](https://github.com/ciefp/CiefpScreenGrab/blob/main/screenshot1.jpg) 
+| ![Preview](https://github.com/ciefp/CiefpScreenGrab/blob/main/screenshot2.jpg) 
+| ![Files](https://github.com/ciefp/CiefpScreenGrab/blob/main/screenshot3.jpg) |
 ---
 
 ## Installation
